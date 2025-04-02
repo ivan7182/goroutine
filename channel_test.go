@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -83,6 +84,25 @@ func TestBufferedChannel(t *testing.T) {
 	}()
 
 	time.Sleep(5 * time.Second)
+	fmt.Println("selesai")
+
+}
+
+//Channel Range
+
+func TestRangeChannel(t *testing.T) {
+	channel := make(chan string)
+
+	go func() {
+		for i := 0; i < 5; i++ {
+			channel <- "perulangan ke " + strconv.Itoa(i)
+		}
+		close(channel)
+	}()
+
+	for data := range channel {
+		fmt.Println("Menerima data", data)
+	}
 	fmt.Println("selesai")
 
 }

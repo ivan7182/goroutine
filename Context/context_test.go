@@ -79,3 +79,44 @@ func TestContextWithCancel(t *testing.T) {
 	time.Sleep(5 * time.Second)
 	fmt.Println("total goroutine", runtime.NumGoroutine())
 }
+
+//context with timeout
+
+func CreateDestinationTimeOut(ctx context.Context) chan int {
+	destination := make(chan int)
+
+	go func() {
+		defer close(destination)
+		counter := 1
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			default:
+				destination <- counter
+				counter++
+				time.Sleep(2 * time.Second)
+			}
+		}
+	}()
+
+	return destination
+}
+
+func TestWithTimeOut(t *testing.T) {
+	fmt.Println("total goroutine", runtime.NumGoroutine())
+
+	parent := context.Background()
+	ctx, cancel := context.WithTimeout(parent, 5*time.Second)
+	defer cancel()
+
+	destination := CreateDestinationTimeOut(ctx)
+	fmt.Println("total goroutine", runtime.NumGoroutine())
+	for n := range destination {
+		fmt.Println("counter", n)
+	}
+
+	time.Sleep(2 * time.Second)
+
+	fmt.Println("total goroutine", runtime.NumGoroutine())
+}
